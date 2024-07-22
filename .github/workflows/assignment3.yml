@@ -75,14 +75,19 @@ jobs:
       - name: Execute queries
         run: |
           touch response.txt
-          while IFS= read -r query; do
-            response=$(curl -s "http://localhost:5001/books${query}")
-            echo -e "query: ${query}\nresponse: ${response}" >> response.txt
-          done < query.txt
+          if [ -f query.txt ]; then
+            while IFS= read -r query; do
+              response=$(curl -s "http://localhost:5001/books${query}")
+              echo -e "query: ${query}\nresponse: ${response}" >> response.txt
+            done < query.txt
+          else
+            echo "query.txt not found" >> response.txt
+          fi
 
       - name: Upload final log and response
-        run: |
-          echo "Finalizing log and uploading artifacts"
+        run: echo "Finalizing log and uploading artifacts"
+
+      - name: Upload log and query responses
         uses: actions/upload-artifact@v4
         with:
           name: log
