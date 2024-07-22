@@ -77,13 +77,18 @@ jobs:
           touch response.txt
           if [ -f query.txt ]; then
             while IFS= read -r query; do
-              response=$(curl -s "http://localhost:5001/books${query}")
-              echo -e "query: ${query}\nresponse: ${response}" >> response.txt
+              response=$(curl -s -w "%{http_code}" -o /dev/null "http://localhost:5001/books${query}")
+              if [ "$response" -eq 200 ]; then
+                response=$(curl -s "http://localhost:5001/books${query}")
+                echo -e "query: ${query}\nresponse: ${response}" >> response.txt
+              else
+                echo -e "query: ${query}\nresponse: error $response" >> response.txt
+              fi
             done < query.txt
           else
             echo "query.txt not found" >> response.txt
           fi
-          exit 0 # Ensure the script does not fail if query.txt is missing
+          exit 0
 
       - name: Upload log
         uses: actions/upload-artifact@v4
