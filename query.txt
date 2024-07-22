@@ -1,0 +1,5 @@
+?title=Adventures of Huckleberry Finn
+?genre=Fiction
+?title=I, Robot
+?genre=Science Fiction
+?publishedDate=2016-06-13
