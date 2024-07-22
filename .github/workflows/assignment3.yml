@@ -74,9 +74,12 @@ jobs:
 
       - name: Execute queries
         run: |
+          set -e
+          echo "Starting query execution" >> log.txt
           touch response.txt
           if [ -f query.txt ]; then
             while IFS= read -r query; do
+              echo "Executing query: ${query}" >> log.txt
               response=$(curl -s -w "%{http_code}" -o /dev/null "http://localhost:5001/books${query}")
               if [ "$response" -eq 200 ]; then
                 response=$(curl -s "http://localhost:5001/books${query}")
