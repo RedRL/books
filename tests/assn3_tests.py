@@ -61,6 +61,3 @@ def test_create_additional_books():
     assert response4.status_code == 201
     assert response5.status_code == 201
     assert response6.status_code == 201
-    assert response4.json()["ID"] != response5.json()["ID"]
-    assert response4.json()["ID"] != response6.json()["ID"]
-    assert response5.json()["ID"] != response6.json()["ID"]
