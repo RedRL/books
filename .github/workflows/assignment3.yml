@@ -42,6 +42,14 @@ jobs:
         run: |
           docker-compose up -d && echo "Container up and running" >> log.txt || echo "Container failed to run" >> log.txt
 
+      - name: Print Docker Compose status
+        run: |
+          docker-compose ps >> log.txt
+
+      - name: Print books service logs
+        run: |
+          docker-compose logs books >> log.txt
+
       - name: Run Pytest
         run: |
           docker-compose exec books pytest -v /app/tests/assn3_tests.py > assn3_test_results.txt && echo "tests succeeded" >> log.txt || echo "tests failed" >> log.txt
@@ -82,6 +90,14 @@ jobs:
       - name: Set up Docker Compose
         run: |
           docker-compose up -d && echo "Container up and running" >> log.txt || echo "Container failed to run" >> log.txt
+
+      - name: Print Docker Compose status
+        run: |
+          docker-compose ps >> log.txt
+
+      - name: Print books service logs
+        run: |
+          docker-compose logs books >> log.txt
 
       - name: Wait for books service to be available
         run: |
