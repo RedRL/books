@@ -89,7 +89,7 @@ jobs:
           if [ -f query.txt ]; then
             while IFS= read -r query; do
               echo "Executing query: ${query}" >> log.txt
-              response=$(curl -s -w "%{http_code}" -o response_body.txt "http://books:5001/books${query}")
+              response=$(curl -s -w "%{http_code}" -o response_body.txt "http://books:5001/books${query}" || echo "Curl command failed" >> log.txt)
               if [ "$response" -eq 200 ]; then
                 cat response_body.txt >> response.txt
                 echo -e "\nquery: ${query}\nresponse: $(<response_body.txt)" >> log.txt
@@ -97,6 +97,7 @@ jobs:
                 echo -e "query: ${query}\nresponse: error $response" >> response.txt
                 echo -e "query: ${query}\nresponse: error $response" >> log.txt
               fi
+              cat response_body.txt >> log.txt  # Log the response body content
             done < query.txt
           fi
           ls -l >> log.txt  # List files after queries
