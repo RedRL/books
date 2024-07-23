@@ -121,7 +121,7 @@ jobs:
           if [ -f query.txt ]; then
             while IFS= read -r query; do
               echo "Executing query: ${query}" >> log.txt
-              docker-compose exec -T books bash -c "curl -s -w \"%{http_code}\" -o response_body.txt \"http://localhost:5001/books${query}\"" > curl_output.txt
+              docker-compose exec -T books bash -c "curl -s -w \"%{http_code}\" -o response_body.txt \"http://localhost:5001/books${query}\"" > curl_output.txt || echo "Curl command failed" >> log.txt
               response=$(tail -n1 curl_output.txt)
               if [ "$response" -eq 200 ]; then
                 cat response_body.txt >> response.txt
