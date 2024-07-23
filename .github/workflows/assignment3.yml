@@ -75,7 +75,8 @@ jobs:
       - name: Execute queries
         run: |
           echo "Starting query execution" >> log.txt
-          touch response.txt
+          touch response.txt || echo "Failed to create response.txt" >> log.txt
+          ls -l >> log.txt # List files to confirm creation
           if [ -f query.txt ]; then
             while IFS= read -r query; do
               echo "Executing query: ${query}" >> log.txt
