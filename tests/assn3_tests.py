@@ -31,6 +31,9 @@ def test_get_book():
     assert response.json()["authors"] == "Mark Twain"
 
 def test_get_books():
+    response1 = requests.post(BASE_URL, json=book1)
+    response2 = requests.post(BASE_URL, json=book2)
+    response3 = requests.post(BASE_URL, json=book3)
     response = requests.get(BASE_URL)
     assert response.status_code == 200
     assert len(response.json()) == 3
@@ -50,3 +53,14 @@ def test_delete_book():
 def test_invalid_genre():
     response = requests.post(BASE_URL, json=book5)
     assert response.status_code in [400, 422]
+
+def test_create_additional_books():
+    response4 = requests.post(BASE_URL, json=book6)
+    response5 = requests.post(BASE_URL, json=book7)
+    response6 = requests.post(BASE_URL, json=book8)
+    assert response4.status_code == 201
+    assert response5.status_code == 201
+    assert response6.status_code == 201
+    assert response4.json()["ID"] != response5.json()["ID"]
+    assert response4.json()["ID"] != response6.json()["ID"]
+    assert response5.json()["ID"] != response6.json()["ID"]

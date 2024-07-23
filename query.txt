@@ -1,5 +1,9 @@
 ?title=Adventures of Huckleberry Finn
-?genre=Fiction
+?title=The Best of Isaac Asimov
+?title=Fear No Evil
+?title=No such book
+?title=The Greatest Joke Book Ever
+?title=The Adventures of Tom Sawyer
 ?title=I, Robot
-?genre=Science Fiction
+?title=Second Foundation
 ?publishedDate=2016-06-13

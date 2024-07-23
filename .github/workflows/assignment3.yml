@@ -115,41 +115,29 @@ jobs:
           if [ -f query.txt ]; then
             while IFS= read -r query; do
               echo "Executing query: ${query}" >> log.txt
-              docker-compose exec -T books bash -c "curl -s -w \"%{http_code}\" -o response_body.txt \"http://localhost:5001/books${query}\"" > curl_output.txt 2>> log.txt || echo "Curl command failed" >> log.txt
+              docker-compose exec -T books bash -c "curl -s -w \"%{http_code}\" -o response_body.txt \"http://localhost:5001/books${query}\"" > curl_output.txt 2>> log.txt
+              cat curl_output.txt >> log.txt
               response=$(tail -n1 curl_output.txt)
-              echo "Curl response code: $response" >> log.txt
-              if [ -f response_body.txt ]; then
-                if [ "$response" -eq 200 ]; then
-                  cat response_body.txt >> response.txt
-                  echo -e "\nquery: ${query}\nresponse: $(<response_body.txt)" >> log.txt
-                else
-                  echo -e "query: ${query}\nresponse: error $response" >> response.txt
-                  echo -e "query: ${query}\nresponse: error $response" >> log.txt
-                fi
-                cat response_body.txt >> log.txt  # Log the response body content
+              if [ "$response" -eq 200 ]; then
+                cat response_body.txt >> response.txt
+                echo -e "\nquery: ${query}\nresponse: $(<response_body.txt)" >> log.txt
               else
-                echo "response_body.txt not found" >> log.txt
-                echo "query: ${query}\nresponse: error $response" >> response.txt
+                echo -e "query: ${query}\nresponse: error $response" >> response.txt
+                echo -e "query: ${query}\nresponse: error $response" >> log.txt
               fi
-              cat curl_output.txt >> log.txt  # Log the curl command output
+              cat response_body.txt >> log.txt  # Log the response body content
             done < query.txt
           fi
           ls -l >> log.txt  # List files after queries
 
-      - name: Print books service logs after queries
-        run: |
-          docker-compose logs books >> log.txt
+      - name: Upload response
+        uses: actions/upload-artifact@v4
+        with:
+          name: response
+          path: response.txt
 
       - name: Upload log
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: log
           path: log.txt
-
-      - name: Upload query responses
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: query-responses
-          path: response.txt
