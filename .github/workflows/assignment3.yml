@@ -28,8 +28,12 @@ jobs:
           - 27017:27017
       books:
         image: books-service
+        build:
+          context: ./books-service
         ports:
           - 5001:5001
+        depends_on:
+          - mongo
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
