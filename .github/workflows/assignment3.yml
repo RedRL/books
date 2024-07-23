@@ -50,6 +50,10 @@ jobs:
         run: |
           docker-compose logs books >> log.txt
 
+      - name: Verify books service is running inside the container
+        run: |
+          docker-compose exec books curl -I http://localhost:5001/books >> log.txt || echo "books service not reachable" >> log.txt
+
       - name: Run Pytest
         run: |
           docker-compose exec books pytest -v /app/tests/assn3_tests.py > assn3_test_results.txt && echo "tests succeeded" >> log.txt || echo "tests failed" >> log.txt
@@ -103,7 +107,7 @@ jobs:
         run: |
           echo "Waiting for books service to be available..." >> log.txt
           for i in {1..30}; do
-            if curl -s "http://books:5001/books" > /dev/null; then
+            if docker-compose exec books curl -s http://localhost:5001/books > /dev/null; then
               echo "books service is available" >> log.txt
               break
             fi
@@ -117,7 +121,7 @@ jobs:
           if [ -f query.txt ]; then
             while IFS= read -r query; do
               echo "Executing query: ${query}" >> log.txt
-              response=$(curl -s -w "%{http_code}" -o response_body.txt "http://books:5001/books${query}")
+              response=$(docker-compose exec books curl -s -w "%{http_code}" -o response_body.txt "http://localhost:5001/books${query}")
               if [ "$response" -eq 200 ]; then
                 cat response_body.txt >> response.txt
                 echo -e "\nquery: ${query}\nresponse: $(<response_body.txt)" >> log.txt
