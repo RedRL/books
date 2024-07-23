@@ -27,14 +27,13 @@ jobs:
   test:
     runs-on: ubuntu-latest
     needs: build
-    services:
-      mongo:
-        image: mongo
-        ports:
-          - 27017:27017
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
+    - name: Ensure port is available
+      run: |
+        sudo lsof -i :27017 && sudo kill -9 $(sudo lsof -t -i :27017) || echo "Port 27017 is available"
 
     - name: Build and start services
       run: |
@@ -67,6 +66,10 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
+    - name: Ensure port is available
+      run: |
+        sudo lsof -i :27017 && sudo kill -9 $(sudo lsof -t -i :27017) || echo "Port 27017 is available"
 
     - name: Build and start services
       run: |
