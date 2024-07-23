@@ -69,14 +69,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Ensure response.txt and query.txt
+        run: |
+          touch log.txt
+          touch response.txt
+          if [ ! -f query.txt ]; then
+            echo "query.txt not found" >> response.txt
+            echo "query.txt not found" >> log.txt
+          fi
+          ls -l >> log.txt  # List files to confirm creation
+
       - name: Set up Docker Compose
-        run: docker-compose up -d
+        run: |
+          docker-compose up -d && echo "Container up and running" >> log.txt || echo "Container failed to run" >> log.txt
 
       - name: Execute queries
         run: |
           echo "Starting query execution" >> log.txt
-          touch response.txt || echo "Failed to create response.txt" >> log.txt
-          ls -l >> log.txt # List files to confirm creation
           if [ -f query.txt ]; then
             while IFS= read -r query; do
               echo "Executing query: ${query}" >> log.txt
@@ -88,9 +97,6 @@ jobs:
                 echo -e "query: ${query}\nresponse: error $response" >> response.txt
               fi
             done < query.txt
-          else
-            echo "query.txt not found" >> response.txt
-            echo "query.txt not found" >> log.txt
           fi
 
       - name: Always upload log
