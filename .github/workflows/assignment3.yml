@@ -93,6 +93,17 @@ jobs:
         run: |
           docker-compose logs books >> log.txt
 
+      - name: Verify books service is running inside the container before queries
+        run: |
+          docker-compose exec -T books curl -I http://localhost:5001/books >> log.txt || echo "books service not reachable before queries" >> log.txt
+
+      - name: Network diagnostics
+        run: |
+          echo "Running network diagnostics" >> log.txt
+          docker-compose exec -T books ping -c 4 mongo >> log.txt || echo "Ping to mongo failed" >> log.txt
+          docker-compose exec -T books ping -c 4 localhost >> log.txt || echo "Ping to localhost failed" >> log.txt
+          docker-compose exec -T books ping -c 4 172.18.0.3 >> log.txt || echo "Ping to 172.18.0.3 failed" >> log.txt
+
       - name: Wait for books service to be available
         run: |
           echo "Waiting for books service to be available..." >> log.txt
