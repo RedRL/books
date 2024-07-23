@@ -89,15 +89,17 @@ jobs:
           if [ -f query.txt ]; then
             while IFS= read -r query; do
               echo "Executing query: ${query}" >> log.txt
-              response=$(curl -s -w "%{http_code}" -o /dev/null "http://localhost:5001/books${query}")
+              response=$(curl -s -w "%{http_code}" -o response_body.txt "http://books:5001/books${query}")
               if [ "$response" -eq 200 ]; then
-                response=$(curl -s "http://localhost:5001/books${query}")
-                echo -e "query: ${query}\nresponse: ${response}" >> response.txt
+                cat response_body.txt >> response.txt
+                echo -e "\nquery: ${query}\nresponse: $(<response_body.txt)" >> log.txt
               else
                 echo -e "query: ${query}\nresponse: error $response" >> response.txt
+                echo -e "query: ${query}\nresponse: error $response" >> log.txt
               fi
             done < query.txt
           fi
+          ls -l >> log.txt  # List files after queries
 
       - name: Upload log
         if: always()
