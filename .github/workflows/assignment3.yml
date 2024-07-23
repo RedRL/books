@@ -32,24 +32,26 @@ jobs:
         image: mongo
         ports:
           - 27017:27017
-      books:
-        image: books-service
-        ports:
-          - 5001:5001
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Wait for services to be ready
+    - name: Build and start services
       run: |
         docker-compose up -d
         sleep 30
-        curl -f http://localhost:5001/books || exit 1
+
+    - name: Wait for books service to be ready
+      run: |
+        until curl -s -f -o /dev/null http://localhost:5001/books; do
+          echo "Waiting for books service..."
+          sleep 5
+        done
       shell: bash
 
     - name: Run tests
       run: |
-        docker-compose exec -T books-service pytest -v tests/assn3_tests.py > assn3_test_results.txt
+        docker-compose exec books pytest -v tests/assn3_tests.py > assn3_test_results.txt
         cat assn3_test_results.txt
       shell: bash
 
@@ -66,11 +68,17 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Wait for services to be ready
+    - name: Build and start services
       run: |
         docker-compose up -d
         sleep 30
-        curl -f http://localhost:5001/books || exit 1
+
+    - name: Wait for books service to be ready
+      run: |
+        until curl -s -f -o /dev/null http://localhost:5001/books; do
+          echo "Waiting for books service..."
+          sleep 5
+        done
       shell: bash
 
     - name: Execute queries
