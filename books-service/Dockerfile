@@ -7,7 +7,7 @@ COPY . /app
 # Install Python dependencies
 RUN apt-get update && \
     apt-get install -y python3-dev && \
-    pip install flask requests pymongo
+    pip install flask requests pymongo pytest
 
 EXPOSE 5001
 
