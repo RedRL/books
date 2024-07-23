@@ -18,6 +18,12 @@ jobs:
     - name: Log build success
       run: echo "Image successfully built" >> log.txt
 
+    - name: Upload log file
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-log
+        path: log.txt
+
   test:
     runs-on: ubuntu-latest
     needs: build
@@ -28,12 +34,8 @@ jobs:
           - 27017:27017
       books:
         image: books-service
-        build:
-          context: ./books-service
         ports:
           - 5001:5001
-        depends_on:
-          - mongo
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -46,7 +48,9 @@ jobs:
       shell: bash
 
     - name: Run tests
-      run: docker-compose exec -T books-service pytest -v tests/assn3_tests.py > assn3_test_results.txt
+      run: |
+        docker-compose exec -T books-service pytest -v tests/assn3_tests.py > assn3_test_results.txt
+        cat assn3_test_results.txt
       shell: bash
 
     - name: Upload test results
