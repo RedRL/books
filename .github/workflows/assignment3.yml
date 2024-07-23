@@ -81,16 +81,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Ensure response.txt and query.txt
-        run: |
-          touch log.txt
-          touch response.txt
-          if [ ! -f query.txt ]; then
-            echo "query.txt not found" >> response.txt
-            echo "query.txt not found" >> log.txt
-          fi
-          ls -l >> log.txt  # List files to confirm creation
-
       - name: Set up Docker Compose
         run: |
           docker-compose up -d && echo "Container up and running" >> log.txt || echo "Container failed to run" >> log.txt
@@ -121,17 +111,23 @@ jobs:
           if [ -f query.txt ]; then
             while IFS= read -r query; do
               echo "Executing query: ${query}" >> log.txt
-              docker-compose exec -T books bash -c "curl -s -w \"%{http_code}\" -o response_body.txt \"http://localhost:5001/books${query}\"" > curl_output.txt 2>> log.txt
-              cat curl_output.txt >> log.txt
+              docker-compose exec -T books bash -c "curl -s -w \"%{http_code}\" -o response_body.txt \"http://localhost:5001/books${query}\"" > curl_output.txt 2>> log.txt || echo "Curl command failed" >> log.txt
               response=$(tail -n1 curl_output.txt)
-              if [ "$response" -eq 200 ]; then
-                cat response_body.txt >> response.txt
-                echo -e "\nquery: ${query}\nresponse: $(<response_body.txt)" >> log.txt
+              echo "Curl response code: $response" >> log.txt
+              if [ -f response_body.txt ]; then
+                if [ "$response" -eq 200 ]; then
+                  cat response_body.txt >> response.txt
+                  echo -e "\nquery: ${query}\nresponse: $(<response_body.txt)" >> log.txt
+                else
+                  echo -e "query: ${query}\nresponse: error $response" >> response.txt
+                  echo -e "query: ${query}\nresponse: error $response" >> log.txt
+                fi
+                cat response_body.txt >> log.txt  # Log the response body content
               else
-                echo -e "query: ${query}\nresponse: error $response" >> response.txt
-                echo -e "query: ${query}\nresponse: error $response" >> log.txt
+                echo "response_body.txt not found" >> log.txt
+                echo "query: ${query}\nresponse: error $response" >> response.txt
               fi
-              cat response_body.txt >> log.txt  # Log the response body content
+              cat curl_output.txt >> log.txt  # Log the curl command output
             done < query.txt
           fi
           ls -l >> log.txt  # List files after queries
