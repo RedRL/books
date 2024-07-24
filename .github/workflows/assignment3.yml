@@ -50,7 +50,7 @@ jobs:
 
     - name: Run tests
       run: |
-        docker-compose exec books pytest -v tests/assn3_tests.py > assn3_test_results.txt
+        docker-compose exec -T books pytest -v tests/assn3_tests.py > assn3_test_results.txt
         cat assn3_test_results.txt
       shell: bash
 
