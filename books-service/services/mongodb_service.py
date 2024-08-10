@@ -79,7 +79,7 @@ class MongoDBService:
         logger.debug("Fetching all ratings")
         ratings_list = list(self.ratings_collection.find())
         for rating in ratings_list:
-            rating['ID"] = str(rating.pop('_id'))
+            rating['ID'] = str(rating.pop('_id'))
         logger.debug(f"Found ratings: {ratings_list}")
         return ratings_list
 
