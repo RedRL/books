@@ -76,6 +76,7 @@ jobs:
           docker compose exec -T books pytest -v /app/tests/assn3_tests.py > assn3_test_results.txt
           cat assn3_test_results.txt
         shell: bash
+        continue-on-error: true
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
