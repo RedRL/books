@@ -24,12 +24,12 @@ def books():
         keys = list(request.args.keys())
 
         # Define a list of allowed query parameters
-        allowed_params = {'id', 'ID', 'title', 'authors', 'isbn', 'ISBN', 'genre', 'publisher', 'publishedDate'}
+        allowed_params = {'ID', 'ID', 'title', 'authors', 'isbn', 'ISBN', 'genre', 'publisher', 'publishedDate'}
         # Check for invalid query parameters
         invalid_params = [key for key in keys if key not in allowed_params]
         if invalid_params:
             return jsonify({"error": f"Invalid query parameters: {', '.join(invalid_params)}. "
-                                     f"Parameters allowed - {allowed_params - {'id', 'isbn'} }"}), 422
+                                     f"Parameters allowed - {allowed_params - {'ID', 'isbn'} }"}), 422
 
         # Validate parameters' values
         errors = validate_query_params()
@@ -116,7 +116,7 @@ def validate_query_params():
     errors = []
 
     # Validate ID
-    id_values = params.getlist('id') + params.getlist('ID')
+    id_values = params.getlist('ID') + params.getlist('ID')
     for id_value in id_values:
         if not id_value or not isinstance(id_value, str):
             errors.append("'ID' must be a non-empty string")
@@ -174,7 +174,7 @@ def validate_query_params():
 def filtered_book_by_field(res_books_list, key, value):
     if key != 'publishedDate':
         if key == 'isbn': key = 'ISBN'
-        if key == 'ID': key = 'id'
+        if key == 'ID': key = 'ID'
         filtered_book_list = [book for book in res_books_list if book[key] == value]
     else:
         # '2014' query will find either '2014-01-01' or '2014'
@@ -336,7 +336,7 @@ def get_rating(id):
         rating = mongodb_service.get_rating(id)
         if not rating:
             return jsonify({"error": f"ID={id} not found"}), 404
-        rating['id'] = str(rating.pop('_id'))  # change _id to id and convert ObjectId to string
+        rating['ID'] = str(rating.pop('_id'))  # change _id to id and convert ObjectId to string
         return jsonify(rating), 200
 
     except Exception as e:
@@ -414,7 +414,7 @@ def top_rated_books():
     top_books_json = []
     for book_rating in top_books_ratings:
         top_books_json.append({
-            "id": book_rating['id'],
+            "ID": book_rating['ID'],
             "title": book_rating['title'],
             "average": book_rating['average']
         })
@@ -441,7 +441,7 @@ def get_book_title_and_id(isbn):
         if book:
             return {
                 "title": book['title'],
-                "id": book['id']
+                "ID": book['ID']
             }
         else:
             return {}

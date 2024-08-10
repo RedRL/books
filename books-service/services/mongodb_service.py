@@ -22,7 +22,7 @@ class MongoDBService:
         logger.debug(f"Fetching book with ID: {id}")
         book = self.books_collection.find_one({'_id': ObjectId(id)})
         if book:
-            book['id'] = str(book.pop('_id'))  # change _id to id and convert ObjectId to string
+            book['ID'] = str(book.pop('_id'))  # change _id to id and convert ObjectId to string
         logger.debug(f"Found book: {book}")
         return book
 
@@ -30,7 +30,7 @@ class MongoDBService:
         logger.debug(f"Fetching book with ISBN: {isbn}")
         book = self.books_collection.find_one({'ISBN': isbn})
         if book:
-            book['id'] = str(book.pop('_id'))
+            book['ID'] = str(book.pop('_id'))
         logger.debug(f"Found book: {book}")
         return book
 
@@ -41,7 +41,7 @@ class MongoDBService:
             logger.debug(f"Raw books from DB: {books}")
 
             for book in books:
-                book['id'] = str(book.pop('_id'))
+                book['ID"] = str(book.pop('_id'))
 
             logger.debug(f"Processed books: {books}")
             return books
@@ -79,7 +79,7 @@ class MongoDBService:
         logger.debug("Fetching all ratings")
         ratings_list = list(self.ratings_collection.find())
         for rating in ratings_list:
-            rating['id'] = str(rating.pop('_id'))
+            rating['ID"] = str(rating.pop('_id'))
         logger.debug(f"Found ratings: {ratings_list}")
         return ratings_list
 
