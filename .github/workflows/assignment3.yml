@@ -4,115 +4,144 @@ on: [push]
 
 jobs:
   build:
+    name: Build Job
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-    - name: Build the Docker image
-      run: docker build -t books-service ./books-service
+      - name: Log Start Time
+        run: echo "$(date -Iminutes)" > log.txt
 
-    - name: Log build success
-      run: echo "Image successfully built" >> log.txt
+      - name: Log Submitter Name
+        run: echo "Harel Yerushalmi" >> log.txt
 
-    - name: Upload log file
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-log
-        path: log.txt
+      - name: Build Docker Image
+        run: |
+          docker build -t books-service ./books-service
+        id: build
+
+      - name: Log Build Result
+        run: |
+          if [ ${{ steps.build.outcome }} == 'success' ]; then
+            echo "image successfully built" >> log.txt
+          else
+            echo "image not able to be built" >> log.txt
+            exit 1
+          fi
+
+      - name: Upload Log File
+        uses: actions/upload-artifact@v4
+        with:
+          name: log.txt
+          path: log.txt
 
   test:
+    name: Test Job
     runs-on: ubuntu-latest
     needs: build
+    services:
+      mongo:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+      books:
+        image: books-service
+        ports:
+          - 5001:5001
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Ensure port is available
-      run: |
-        sudo lsof -i :27017 && sudo kill -9 $(sudo lsof -t -i :27017) || echo "Port 27017 is available"
+      - name: Log Container Start Result
+        run: |
+          echo "Container up and running" >> log.txt
 
-    - name: Build and start services
-      run: |
-        docker-compose up -d
-        sleep 30
+      - name: Run Tests
+        run: |
+          docker-compose -f docker-compose.yml up -d
+          pytest tests/assn3_tests.py --junitxml=results.xml
+        id: test
 
-    - name: Wait for books service to be ready
-      run: |
-        until curl -s -f -o /dev/null http://localhost:5001/books; do
-          echo "Waiting for books service..."
-          sleep 5
-        done
-      shell: bash
+      - name: Log Test Result
+        run: |
+          if [ ${{ steps.test.outcome }} == 'success' ]; then
+            echo "tests succeeded" >> log.txt
+          else
+            echo "tests failed" >> log.txt
+            exit 1
+          fi
 
-    - name: Run tests
-      run: |
-        docker-compose exec -T books pytest -v tests/assn3_tests.py > assn3_test_results.txt
-        cat assn3_test_results.txt
-      shell: bash
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: results.xml
 
-    - name: Upload test results
-      uses: actions/upload-artifact@v4
-      with:
-        name: assn3_test_results
-        path: assn3_test_results.txt
+      - name: Upload Log File
+        uses: actions/upload-artifact@v4
+        with:
+          name: log.txt
+          path: log.txt
 
   query:
+    name: Query Job
     runs-on: ubuntu-latest
     needs: test
+    services:
+      mongo:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+      books:
+        image: books-service
+        ports:
+          - 5001:5001
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Ensure port is available
-      run: |
-        sudo lsof -i :27017 && sudo kill -9 $(sudo lsof -t -i :27017) || echo "Port 27017 is available"
+      - name: Start Docker Containers
+        run: docker-compose -f docker-compose.yml up -d
 
-    - name: Build and start services
-      run: |
-        docker-compose up -d
-        sleep 30
+      - name: Execute POST Requests for Specific Books
+        run: |
+          curl -X POST "http://localhost:5001/books" -H "Content-Type: application/json" -d @<(echo '{"title": "Adventures of Huckleberry Finn", "ISBN": "9780520343641", "genre": "Fiction"}')
+          curl -X POST "http://localhost:5001/books" -H "Content-Type: application/json" -d @<(echo '{"title": "The Best of Isaac Asimov", "ISBN": "9780385050784", "genre": "Science Fiction"}')
+          curl -X POST "http://localhost:5001/books" -H "Content-Type: application/json" -d @<(echo '{"title": "Fear No Evil", "ISBN": "9780394558783", "genre": "Biography"}')
+          curl -X POST "http://localhost:5001/books" -H "Content-Type: application/json" -d @<(echo '{"title": "The Adventures of Tom Sawyer", "ISBN": "9780195810400", "genre": "Fiction"}')
+          curl -X POST "http://localhost:5001/books" -H "Content-Type: application/json" -d @<(echo '{"title": "I, Robot", "ISBN": "9780553294385", "genre": "Science Fiction"}')
+          curl -X POST "http://localhost:5001/books" -H "Content-Type: application/json" -d @<(echo '{"title": "Second Foundation", "ISBN": "9780553293364", "genre": "Science Fiction"}')
 
-    - name: Wait for books service to be ready
-      run: |
-        until curl -s -f -o /dev/null http://localhost:5001/books; do
-          echo "Waiting for books service..."
-          sleep 5
-        done
-      shell: bash
-
-    - name: Execute queries
-      run: |
-        echo "Starting query execution" >> log.txt
-        if [ -f query.txt ]; then
+      - name: Run Queries from query.txt and Save Responses
+        run: |
           while IFS= read -r query; do
-            echo "Executing query: ${query}" >> log.txt
-            curl_output=$(curl -s -w "\n%{http_code}" -o response_body.txt "http://localhost:5001/books${query}")
-            response=$(tail -n1 <<< "$curl_output")
-            if [ "$response" -eq 200 ]; then
-              cat response_body.txt >> response.txt
-              echo -e "\nquery: ${query}\nresponse: $(<response_body.txt)" >> log.txt
+            echo "query: $query" >> response.txt
+            response=$(curl -s -w "\n%{http_code}" "http://localhost:5001/books$query")
+            body=$(echo "$response" | sed '$d')
+            status_code=$(echo "$response" | tail -n1)
+            if [ "$status_code" -eq 200 ]; then
+              echo "response: $body" >> response.txt
             else
-              echo -e "query: ${query}\nresponse: error $response" >> response.txt
-              echo -e "query: ${query}\nresponse: error $response" >> log.txt
+              echo "response: error $status_code" >> response.txt
             fi
-            cat response_body.txt >> log.txt  # Log the response body content
+            echo "" >> response.txt
           done < query.txt
-        fi
-        ls -l >> log.txt  # List files after queries
-      shell: bash
+        id: query
 
-    - name: Upload response
-      uses: actions/upload-artifact@v4
-      with:
-        name: response
-        path: response.txt
+      - name: Upload Query Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: response.txt
+          path: response.txt
 
-    - name: Upload log
-      uses: actions/upload-artifact@v4
-      with:
-        name: log
-        path: log.txt
+      - name: Upload Log File
+        uses: actions/upload-artifact@v4
+        with:
+          name: log.txt
+          path: log.txt
