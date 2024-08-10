@@ -67,6 +67,10 @@ jobs:
           done
         shell: bash
 
+      - name: List files in container
+        run: docker compose exec -T books ls -R /app
+        shell: bash
+
       - name: Run Tests
         run: |
           docker compose exec -T books pytest -v tests/assn3_tests.py > assn3_test_results.txt
