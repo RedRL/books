@@ -48,11 +48,6 @@ jobs:
     name: Test Job
     runs-on: ubuntu-latest
     needs: build
-    services:
-      mongo:
-        image: mongo:latest
-        ports:
-          - 27017:27017
 
     steps:
       - name: Checkout code
@@ -62,6 +57,14 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y docker-compose
+
+      - name: Stop any existing containers using port 27017
+        run: |
+          existing_container=$(docker ps -q --filter "expose=27017")
+          if [ -n "$existing_container" ]; then
+            docker stop $existing_container
+            docker rm $existing_container
+          fi
 
       - name: Start Docker Containers
         run: docker-compose up -d
@@ -109,6 +112,14 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y docker-compose
+
+      - name: Stop any existing containers using port 27017
+        run: |
+          existing_container=$(docker ps -q --filter "expose=27017")
+          if [ -n "$existing_container" ]; then
+            docker stop $existing_container
+            docker rm $existing_container
+          fi
 
       - name: Start Docker Containers
         run: docker-compose up -d
