@@ -58,10 +58,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y docker-compose
 
-      - name: Install pytest
-        run: |
-          pip install pytest
-
       - name: Stop any existing containers using port 27017
         run: |
           existing_container=$(docker ps -q --filter "expose=27017")
@@ -73,9 +69,12 @@ jobs:
       - name: Start Docker Containers
         run: docker-compose up -d
 
-      - name: Log Container Start Result
+      - name: Wait for books service to be healthy
         run: |
-          echo "Container up and running" >> log.txt
+          until [ "`docker inspect -f {{.State.Health.Status}} books`" == "healthy" ]; do
+            echo "Waiting for books service to be healthy..."
+            sleep 5
+          done
 
       - name: Run Tests
         run: |
@@ -127,6 +126,13 @@ jobs:
 
       - name: Start Docker Containers
         run: docker-compose up -d
+
+      - name: Wait for books service to be healthy
+        run: |
+          until [ "`docker inspect -f {{.State.Health.Status}} books`" == "healthy" ]; do
+            echo "Waiting for books service to be healthy..."
+            sleep 5
+          done
 
       - name: Execute POST Requests for Specific Books
         run: |
