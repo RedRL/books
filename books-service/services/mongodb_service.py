@@ -41,7 +41,7 @@ class MongoDBService:
             logger.debug(f"Raw books from DB: {books}")
 
             for book in books:
-                book['ID"] = str(book.pop('_id'))
+                book['ID'] = str(book.pop('_id'))
 
             logger.debug(f"Processed books: {books}")
             return books
