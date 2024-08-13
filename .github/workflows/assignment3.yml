@@ -36,7 +36,7 @@ jobs:
       - name: Upload Log File
         uses: actions/upload-artifact@v4
         with:
-          name: log.txt
+          name: log
           path: log.txt
 
   test:
@@ -47,6 +47,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Download Log File
+        uses: actions/download-artifact@v4
+        with:
+          name: log
 
       - name: Ensure port is available
         run: |
@@ -62,32 +67,40 @@ jobs:
       - name: Wait for books service to be ready
         run: |
           until curl -s -f -o /dev/null http://localhost:5001/books; do
-            echo "Waiting for books service..."
+            echo "Waiting for books service..." >> log.txt
             sleep 5
           done
         shell: bash
 
       - name: List files in container
-        run: docker compose exec -T books ls -R /app
+        run: docker compose exec -T books ls -R /app >> log.txt
         shell: bash
 
       - name: Run Tests
         run: |
           docker compose exec -T books pytest -v /app/tests/assn3_tests.py > assn3_test_results.txt
-          cat assn3_test_results.txt
+          cat assn3_test_results.txt >> log.txt
         shell: bash
         continue-on-error: true
+        id: test
 
-      - name: Upload Test Results
+      - name: Log Test Result
+        run: |
+          if [ ${{ steps.test.outcome }} == 'success' ]; then
+            echo "tests succeeded" >> log.txt
+          else
+            echo "tests failed" >> log.txt
+          fi
+
+      - name: Upload Test Results and Final Log File
         uses: actions/upload-artifact@v4
         with:
           name: assn3_test_results
           path: assn3_test_results.txt
-
-      - name: Upload Log File
+      - name: Upload Final Log File
         uses: actions/upload-artifact@v4
         with:
-          name: log.txt
+          name: log
           path: log.txt
 
   query:
@@ -113,49 +126,36 @@ jobs:
       - name: Wait for books service to be ready
         run: |
           until curl -s -f -o /dev/null http://localhost:5001/books; do
-            echo "Waiting for books service..."
             sleep 5
           done
         shell: bash
 
       - name: Execute Queries
         run: |
-          echo "Starting query execution" >> log.txt
+          echo "Starting query execution" > query_log.txt
           touch response.txt  # Ensure the response.txt file exists
           if [ -f query.txt ]; then
             while IFS= read -r query; do
-              echo "Executing query: ${query}" >> log.txt
-
-              # Execute the curl command and capture the output and response code
-              curl_output=$(curl -s -w "\n%{http_code}" -o response_body.txt "http://localhost:5001/books${query}")
+              curl_output=$(curl -s -w "\n%{http_code}" -o response_body.txt "http://localhost:5001/books${query}" 2>>query_log.txt)
               response=$(tail -n1 <<< "$curl_output")
-
+              
               if [ "$response" -eq 200 ]; then
                 cat response_body.txt >> response.txt
-                echo -e "\nquery: ${query}\nresponse: $(<response_body.txt)" >> log.txt
               else
                 echo -e "query: ${query}\nresponse: error $response" >> response.txt
-                echo -e "query: ${query}\nresponse: error $response" >> log.txt
               fi
-
-              cat response_body.txt >> log.txt  # Log the response body content
             done < query.txt
           else
-            echo "query.txt file not found" >> log.txt
-            echo "No queries to execute." >> response.txt  # Write a message to response.txt to ensure it exists
+            echo "query.txt file not found" >> response.txt  # Write a message to response.txt to ensure it exists
           fi
 
-          ls -l >> log.txt  # List files after queries
-        shell: /usr/bin/bash --noprofile --norc -o pipefail {0}
-
-      - name: Upload Query Results
+      - name: Upload Query Results and Query Log File
         uses: actions/upload-artifact@v4
         with:
           name: response
           path: response.txt
-
-      - name: Upload Log File
+      - name: Upload Query Log File
         uses: actions/upload-artifact@v4
         with:
-          name: log.txt
-          path: log.txt
+          name: query_log
+          path: query_log.txt
