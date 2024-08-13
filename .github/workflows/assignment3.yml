@@ -121,11 +121,15 @@ jobs:
       - name: Execute Queries
         run: |
           echo "Starting query execution" >> log.txt
+          touch response.txt  # Ensure the response.txt file exists
           if [ -f query.txt ]; then
             while IFS= read -r query; do
               echo "Executing query: ${query}" >> log.txt
+              
+              # Execute the curl command and capture the output and response code
               curl_output=$(curl -s -w "\n%{http_code}" -o response_body.txt "http://localhost:5001/books${query}")
               response=$(tail -n1 <<< "$curl_output")
+              
               if [ "$response" -eq 200 ]; then
                 cat response_body.txt >> response.txt
                 echo -e "\nquery: ${query}\nresponse: $(<response_body.txt)" >> log.txt
@@ -133,14 +137,17 @@ jobs:
                 echo -e "query: ${query}\nresponse: error $response" >> response.txt
                 echo -e "query: ${query}\nresponse: error $response" >> log.txt
               fi
+              
               cat response_body.txt >> log.txt  # Log the response body content
             done < query.txt
           else
             echo "query.txt file not found" >> log.txt
+            echo "No queries to execute." >> response.txt  # Write a message to response.txt to ensure it exists
           fi
+          
           ls -l >> log.txt  # List files after queries
         shell: bash
-        continue-on-error: true
+        continue-on-error: true  # Continue even if there are errors in the commands
 
       - name: Upload Query Results
         uses: actions/upload-artifact@v4
