@@ -135,9 +135,12 @@ jobs:
               fi
               cat response_body.txt >> log.txt  # Log the response body content
             done < query.txt
+          else
+            echo "query.txt file not found" >> log.txt
           fi
           ls -l >> log.txt  # List files after queries
         shell: bash
+        continue-on-error: true
 
       - name: Upload Query Results
         uses: actions/upload-artifact@v4
