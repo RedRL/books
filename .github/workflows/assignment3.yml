@@ -48,11 +48,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download Log File (Build)
-        uses: actions/download-artifact@v4
-        with:
-          name: log.txt
-          path: log.txt
+
 
       - name: Ensure port is available
         run: |
@@ -82,16 +78,16 @@ jobs:
       - name: Log Test Result
         run: |
           if [ ${{ steps.test.outcome }} == 'success' ]; then
-            echo "tests succeeded" >> log.txt
+            echo "tests succeeded" > log2.txt
           else
-            echo "tests failed" >> log.txt
+            echo "tests failed" >> log2.txt
           fi
 
       - name: Upload Final Log File
         uses: actions/upload-artifact@v4
         with:
-          name: log.txt
-          path: log.txt
+          name: log2.txt
+          path: log2.txt
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
