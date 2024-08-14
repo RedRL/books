@@ -33,12 +33,6 @@ jobs:
             exit 1
           fi
 
-      - name: Upload Log File
-        uses: actions/upload-artifact@v4
-        with:
-          name: log
-          path: log.txt
-
   test:
     name: Test Job
     runs-on: ubuntu-latest
@@ -47,11 +41,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Download Log File
-        uses: actions/download-artifact@v4
-        with:
-          name: log
 
       - name: Ensure port is available
         run: |
@@ -92,17 +81,6 @@ jobs:
             echo "tests failed" >> log.txt
           fi
 
-      - name: Upload Test Results and Final Log File
-        uses: actions/upload-artifact@v4
-        with:
-          name: assn3_test_results
-          path: assn3_test_results.txt
-      - name: Upload Final Log File
-        uses: actions/upload-artifact@v4
-        with:
-          name: log
-          path: log.txt
-
   query:
     name: Query Job
     runs-on: ubuntu-latest
@@ -132,11 +110,10 @@ jobs:
 
       - name: Execute Queries
         run: |
-          echo "Starting query execution" > query_log.txt
           touch response.txt  # Ensure the response.txt file exists
           if [ -f query.txt ]; then
             while IFS= read -r query; do
-              curl_output=$(curl -s -w "\n%{http_code}" -o response_body.txt "http://localhost:5001/books${query}" 2>>query_log.txt)
+              curl_output=$(curl -s -w "\n%{http_code}" -o response_body.txt "http://localhost:5001/books${query}" 2>>log.txt)
               response=$(tail -n1 <<< "$curl_output")
               
               if [ "$response" -eq 200 ]; then
@@ -149,13 +126,22 @@ jobs:
             echo "query.txt file not found" >> response.txt  # Write a message to response.txt to ensure it exists
           fi
 
-      - name: Upload Query Results and Query Log File
+  finalize:
+    name: Finalize and Upload Log
+    runs-on: ubuntu-latest
+    needs: query
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Upload Final Log File and Query Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: log
+          path: log.txt
+      - name: Upload Query Results
         uses: actions/upload-artifact@v4
         with:
           name: response
           path: response.txt
-      - name: Upload Query Log File
-        uses: actions/upload-artifact@v4
-        with:
-          name: query_log
-          path: query_log.txt
