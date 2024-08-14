@@ -7,9 +7,9 @@ jobs:
     name: Build Job
     runs-on: ubuntu-latest
     outputs:
-      output_time: ${{ steps.time.outputs.TIME }}
-      output_name: ${{ steps.name.outputs.NAME }}
-      output_result: ${{ steps.result.outputs.RESULT }}
+      output_time: ${{ steps.time.outputs.time_value }}
+      output_name: ${{ steps.name.outputs.name_value }}
+      output_result: ${{ steps.result.outputs.result_value }}
 
     steps:
       - name: Checkout code
@@ -20,23 +20,24 @@ jobs:
 
       - name: Output Start Time
         id: time
-        run: echo "$(date -Iminutes)" >> "$GITHUB_OUTPUT"
+        run: echo "time_value=$(date -Iminutes)" >> $GITHUB_OUTPUT
 
       - name: Output Submitter Name
         id: name
-        run: echo "Harel Yerushalmi" >> "$GITHUB_OUTPUT"
+        run: echo "name_value=Harel Yerushalmi" >> $GITHUB_OUTPUT
 
       - name: Build Docker Image
         run: |
           docker compose build
+        id: build
 
       - name: Output Build Result
         id: result
         run: |
           if [ ${{ steps.build.outcome }} == 'success' ]; then
-            echo "image successfully built" >> "$GITHUB_OUTPUT"
+            echo "result_value=image successfully built" >> $GITHUB_OUTPUT
           else
-            echo "image not able to be built" >> "$GITHUB_OUTPUT"
+            echo "result_value=image not able to be built" >> $GITHUB_OUTPUT
             exit 1
           fi
 
@@ -80,8 +81,8 @@ jobs:
       - name: Log Test Result
         run: |
           echo "$TIME" > log.txt
-          echo "NAME" >> log.txt
-          echo "RESULT" >> log.txt
+          echo "$NAME" >> log.txt
+          echo "$RESULT" >> log.txt
           if [ ${{ steps.test.outcome }} == 'success' ]; then
             echo "tests succeeded" >> log.txt
           else
@@ -125,10 +126,10 @@ jobs:
           if [ -f query.txt ]; then
             while IFS= read -r query; do
               encoded_query=$(echo "$query" | sed 's/ /%20/g')  # Encode spaces in the query string
-              curl_output=$(curl -s -w "\n%{http_code}" -o response_body.txt "http://localhost:5001/books${encoded_query}"
+              curl_output=$(curl -s -w "\n%{http_code}" -o response_body.txt "http://localhost:5001/books${encoded_query}")
               response=$(tail -n1 <<< "$curl_output")
 
-              if [ "$response" -eq 200]; then
+              if [ "$response" -eq 200 ]; then
                 cat response_body.txt >> response.txt
               else
                 echo -e "query: ${query}\nresponse: error $response" >> response.txt
