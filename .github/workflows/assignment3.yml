@@ -16,8 +16,14 @@ jobs:
       - name: Log Start Time
         run: echo "$(date -Iminutes)" > $GITHUB_WORKSPACE/log.txt
 
+      - name: Display Log File (After Start Time)
+        run: cat $GITHUB_WORKSPACE/log.txt
+
       - name: Log Submitter Name
         run: echo "Harel Yerushalmi" >> $GITHUB_WORKSPACE/log.txt
+
+      - name: Display Log File (After Submitter Name)
+        run: cat $GITHUB_WORKSPACE/log.txt
 
       - name: Build Docker Image
         run: |
@@ -32,6 +38,9 @@ jobs:
             echo "image not able to be built" >> $GITHUB_WORKSPACE/log.txt
             exit 1
           fi
+
+      - name: Display Log File (After Build Result)
+        run: cat $GITHUB_WORKSPACE/log.txt
 
   test:
     name: Test Job
@@ -75,7 +84,10 @@ jobs:
             echo "tests failed" >> $GITHUB_WORKSPACE/log.txt
           fi
 
-      - name: Upload Final Log and Query Results
+      - name: Display Log File (After Test Result)
+        run: cat $GITHUB_WORKSPACE/log.txt
+
+      - name: Upload Final Log File
         uses: actions/upload-artifact@v4
         with:
           name: log.txt
@@ -123,4 +135,6 @@ jobs:
             done < query.txt
           else
             echo "query.txt file not found" >> response.txt  # Write a message to response.txt to ensure it exists
-          fi
+
+      - name: Display Log File (After Execute Queries)
+        run: cat $GITHUB_WORKSPACE/log.txt
