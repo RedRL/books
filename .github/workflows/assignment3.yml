@@ -62,7 +62,13 @@ jobs:
           fi
 
       - name: Start Docker Containers
-        run: docker compose up -d
+        run: |
+          docker compose up -d
+          if [ $? -eq 0 ]; then
+            echo "Container up and running" >> log.txt
+          else
+            echo "Container failed to run" >> log.txt
+          fi
 
       - name: Wait for books service to be ready
         run: |
@@ -110,6 +116,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Download Log File
+        uses: actions/download-artifact@v4
+        with:
+          name: final-log
+          path: $GITHUB_WORKSPACE/log.txt
+
       - name: Start Docker Containers
         run: docker compose up -d
 
@@ -129,7 +141,7 @@ jobs:
               curl_output=$(curl -s -w "\n%{http_code}" -o response_body.txt "http://localhost:5001/books${encoded_query}")
               response=$(tail -n1 <<< "$curl_output")
 
-              if [ "$response" -eq 200 ]; then
+              if [ "$response" -eq 200]; then
                 cat response_body.txt >> response.txt
               else
                 echo -e "query: ${query}\nresponse: error $response" >> response.txt
@@ -142,5 +154,5 @@ jobs:
       - name: Upload Query Results
         uses: actions/upload-artifact@v4
         with:
-          name: response
+          name: response.txt
           path: response.txt
