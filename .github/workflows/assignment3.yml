@@ -33,11 +33,7 @@ jobs:
             exit 1
           fi
 
-      - name: Upload Log File (Build)
-        uses: actions/upload-artifact@v4
-        with:
-          name: log.txt
-          path: log.txt
+
 
   test:
     name: Test Job
