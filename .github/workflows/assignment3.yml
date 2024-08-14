@@ -53,6 +53,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Log Build Job Outputs
+        run: |
+          echo "$TIME" > log.txt
+          echo "$NAME" >> log.txt
+          echo "$RESULT" >> log.txt
+
       - name: Ensure port is available
         run: |
           existing_container=$(docker ps -q --filter "expose=27017")
@@ -86,9 +92,6 @@ jobs:
 
       - name: Log Test Result
         run: |
-          echo "$TIME" > log.txt
-          echo "$NAME" >> log.txt
-          echo "$RESULT" >> log.txt
           if [ ${{ steps.test.outcome }} == 'success' ]; then
             echo "tests succeeded" >> log.txt
           else
@@ -133,12 +136,17 @@ jobs:
             while IFS= read -r query; do
               encoded_query=$(echo "$query" | sed 's/ /%20/g')  # Encode spaces in the query string
               curl_output=$(curl -s -w "\n%{http_code}" -o response_body.txt "http://localhost:5001/books${encoded_query}")
-              response=$(tail -n1 <<< "$curl_output")
+              response_code=$(tail -n1 <<< "$curl_output")
 
-              if [ "$response" -eq 200]; then
-                cat response_body.txt >> response.txt
+              if [ "$response_code" -eq 200 ]; then
+                # Check if the response is valid JSON
+                if jq empty response_body.txt > /dev/null 2>&1; then
+                  echo -e "query: ${query}\nresponse: $(<response_body.txt)" >> response.txt
+                else
+                  echo -e "query: ${query}\nresponse: error invalid JSON" >> response.txt
+                fi
               else
-                echo -e "query: ${query}\nresponse: error $response" >> response.txt
+                echo -e "query: ${query}\nresponse: error $response_code" >> response.txt
               fi
             done < query.txt
           else
