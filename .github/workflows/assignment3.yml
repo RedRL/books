@@ -90,6 +90,11 @@ jobs:
         continue-on-error: true
         id: test
 
+      - name: Inspect Database Content
+        run: |
+          curl -s "http://localhost:5001/books" > db_content.txt
+          cat db_content.txt
+
       - name: Log Test Result
         run: |
           if [ ${{ steps.test.outcome }} == 'success' ]; then
