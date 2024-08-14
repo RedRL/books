@@ -132,12 +132,13 @@ jobs:
 
       - name: Execute Queries
         run: |
-          set -x  # Enable debug mode
-          set +e  # Disable exit on error
+          set -x
+          set +e
           touch response.txt  # Ensure the response.txt file exists
           if [ -f query.txt ]; then
             while IFS= read -r query; do
-              curl_output=$(curl -s -w "\n%{http_code}" -o response_body.txt "http://localhost:5001/books${query}" 2>>log.txt)
+              encoded_query=$(echo "$query" | sed 's/ /%20/g')  # Encode spaces in the query string
+              curl_output=$(curl -s -w "\n%{http_code}" -o response_body.txt "http://localhost:5001/books${encoded_query}" 2>>log.txt)
               response=$(tail -n1 <<< "$curl_output")
               
               if [ "$response" -eq 200 ]; then
@@ -149,7 +150,6 @@ jobs:
           else
             echo "query.txt file not found" >> response.txt  # Write a message to response.txt to ensure it exists
           fi
-          ls -l >> log.txt  # List files after queries
         shell: /usr/bin/bash +x {0}
 
       - name: Upload Log File and Query Results (Query)
