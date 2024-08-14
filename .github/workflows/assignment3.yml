@@ -20,7 +20,7 @@ jobs:
 
       - name: Output Start Time
         id: time
-        run: echo "$(date -Iminutes)" > "$GITHUB_OUTPUT"
+        run: echo "$(date -Iminutes)" >> "$GITHUB_OUTPUT"
 
       - name: Output Submitter Name
         id: name
