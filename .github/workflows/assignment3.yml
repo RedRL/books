@@ -95,7 +95,7 @@ jobs:
             echo "tests failed" >> log.txt
           fi
 
-      - name: Upload Final Log File
+      - name: Upload Log File
         uses: actions/upload-artifact@v4
         with:
           name: log
@@ -115,12 +115,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Download Log File
-        uses: actions/download-artifact@v4
-        with:
-          name: final-log
-          path: $GITHUB_WORKSPACE/log.txt
 
       - name: Start Docker Containers
         run: docker compose up -d
