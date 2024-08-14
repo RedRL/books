@@ -132,6 +132,8 @@ jobs:
 
       - name: Execute Queries
         run: |
+          set -x  # Enable debug mode
+          set +e  # Disable exit on error
           touch response.txt  # Ensure the response.txt file exists
           if [ -f query.txt ]; then
             while IFS= read -r query; do
@@ -147,6 +149,8 @@ jobs:
           else
             echo "query.txt file not found" >> response.txt  # Write a message to response.txt to ensure it exists
           fi
+          ls -l >> log.txt  # List files after queries
+        shell: /usr/bin/bash +x {0}
 
       - name: Upload Log File and Query Results (Query)
         uses: actions/upload-artifact@v4
