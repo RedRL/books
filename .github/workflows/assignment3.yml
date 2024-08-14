@@ -75,6 +75,12 @@ jobs:
             echo "tests failed" >> $GITHUB_WORKSPACE/log.txt
           fi
 
+      - name: Upload Final Log and Query Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: log.txt
+          path: $GITHUB_WORKSPACE/log.txt
+
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
         with:
@@ -118,9 +124,3 @@ jobs:
           else
             echo "query.txt file not found" >> response.txt  # Write a message to response.txt to ensure it exists
           fi
-
-      - name: Upload Final Log and Query Results
-        uses: actions/upload-artifact@v4
-        with:
-          name: log
-          path: log.txt
