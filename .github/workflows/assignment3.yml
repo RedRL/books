@@ -36,7 +36,7 @@ jobs:
       - name: Upload Log File (Build)
         uses: actions/upload-artifact@v4
         with:
-          name: log
+          name: log.txt
           path: log.txt
 
   test:
@@ -51,7 +51,7 @@ jobs:
       - name: Download Log File (Build)
         uses: actions/download-artifact@v4
         with:
-          name: log
+          name: log.txt
           path: log.txt
 
       - name: Ensure port is available
