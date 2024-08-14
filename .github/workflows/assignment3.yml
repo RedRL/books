@@ -33,7 +33,11 @@ jobs:
             exit 1
           fi
 
-
+      - name: Upload Log File (Build)
+        uses: actions/upload-artifact@v4
+        with:
+          name: log
+          path: log.txt
 
   test:
     name: Test Job
@@ -44,7 +48,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-
+      - name: Download Log File (Build)
+        uses: actions/download-artifact@v4
+        with:
+          name: log
 
       - name: Ensure port is available
         run: |
@@ -79,10 +86,10 @@ jobs:
             echo "tests failed" >> log.txt
           fi
 
-      - name: Upload Final Log File
+      - name: Upload Final Log File (Test)
         uses: actions/upload-artifact@v4
         with:
-          name: log.txt
+          name: log
           path: log.txt
 
       - name: Upload Test Results
@@ -99,6 +106,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Download Log File (Test)
+        uses: actions/download-artifact@v4
+        with:
+          name: log
 
       - name: Start Docker Containers
         run: docker compose up -d
@@ -129,8 +141,8 @@ jobs:
             echo "query.txt file not found" >> response.txt  # Write a message to response.txt to ensure it exists
           fi
 
-      - name: Upload Query Results
+      - name: Upload Final Log and Query Results
         uses: actions/upload-artifact@v4
         with:
-          name: response.txt
-          path: response.txt
+          name: log
+          path: log.txt
