@@ -6,6 +6,8 @@ jobs:
   build:
     name: Build Job
     runs-on: ubuntu-latest
+    outputs:
+      log_path: ${{ steps.store-log-path.outputs.log_path }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -16,14 +18,8 @@ jobs:
       - name: Log Start Time
         run: echo "$(date -Iminutes)" > $GITHUB_WORKSPACE/log.txt
 
-      - name: Display Log File (After Start Time)
-        run: cat $GITHUB_WORKSPACE/log.txt
-
       - name: Log Submitter Name
         run: echo "Harel Yerushalmi" >> $GITHUB_WORKSPACE/log.txt
-
-      - name: Display Log File (After Submitter Name)
-        run: cat $GITHUB_WORKSPACE/log.txt
 
       - name: Build Docker Image
         run: |
@@ -39,14 +35,16 @@ jobs:
             exit 1
           fi
 
-      - name: Display Log File (After Build Result)
-        run: cat $GITHUB_WORKSPACE/log.txt
+      - name: Store Log Path
+        id: store-log-path
+        run: echo "log_path=$GITHUB_WORKSPACE/log.txt" >> $GITHUB_OUTPUT
 
   test:
     name: Test Job
     runs-on: ubuntu-latest
     needs: build
-
+    env:
+      LOG_PATH: ${{ needs.build.outputs.log_path }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -79,19 +77,16 @@ jobs:
       - name: Log Test Result
         run: |
           if [ ${{ steps.test.outcome }} == 'success' ]; then
-            echo "tests succeeded" >> $GITHUB_WORKSPACE/log.txt
+            echo "tests succeeded" >> $LOG_PATH
           else
-            echo "tests failed" >> $GITHUB_WORKSPACE/log.txt
+            echo "tests failed" >> $LOG_PATH
           fi
-
-      - name: Display Log File (After Test Result)
-        run: cat $GITHUB_WORKSPACE/log.txt
 
       - name: Upload Final Log File
         uses: actions/upload-artifact@v4
         with:
           name: log.txt
-          path: $GITHUB_WORKSPACE/log.txt
+          path: ${{ env.LOG_PATH }}
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
@@ -124,7 +119,7 @@ jobs:
           if [ -f query.txt ]; then
             while IFS= read -r query; do
               encoded_query=$(echo "$query" | sed 's/ /%20/g')  # Encode spaces in the query string
-              curl_output=$(curl -s -w "\n%{http_code}" -o response_body.txt "http://localhost:5001/books${encoded_query}" 2>>$GITHUB_WORKSPACE/log.txt)
+              curl_output=$(curl -s -w "\n%{http_code}" -o response_body.txt "http://localhost:5001/books${encoded_query}" 2>> ${{ env.LOG_PATH }})
               response=$(tail -n1 <<< "$curl_output")
 
               if [ "$response" -eq 200]; then
@@ -135,6 +130,4 @@ jobs:
             done < query.txt
           else
             echo "query.txt file not found" >> response.txt  # Write a message to response.txt to ensure it exists
-
-      - name: Display Log File (After Execute Queries)
-        run: cat $GITHUB_WORKSPACE/log.txt
+          fi
