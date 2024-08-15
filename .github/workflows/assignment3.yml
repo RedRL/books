@@ -40,8 +40,8 @@ jobs:
       - name: Log and Upload on Failure
         if: failure() || steps.build.outcome != 'success'
         run: |
-          echo "$TIME" > log.txt
-          echo "$NAME" >> log.txt
+          echo "${{ steps.time.outputs.time_value }}" > log.txt
+          echo "${{ steps.name.outputs.name_value }}" >> log.txt
           echo "image not able to be built" >> log.txt
 
       - name: Upload Log File on Failure
