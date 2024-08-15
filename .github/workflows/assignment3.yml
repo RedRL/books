@@ -27,9 +27,9 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build Docker Image
+        id: build
         run: |
           docker compose build
-        id: build
 
       - name: Log Build Result
         id: result
@@ -82,6 +82,7 @@ jobs:
           fi
 
       - name: Start Docker Containers
+        id: start_containers
         run: |
           docker compose up -d
           if [ $? -eq 0 ]; then
@@ -89,6 +90,17 @@ jobs:
           else
             echo "Container failed to run" >> log.txt
           fi
+
+      - name: Upload Log File on Failure
+        if: ${{ steps.start_containers.outcome == 'failure' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: log
+          path: log.txt
+
+      - name: Exit on Container Failure
+        if: ${{ steps.start_containers.outcome == 'failure' }}
+        run: exit 1
 
       - name: Wait for books service to be ready
         run: |
@@ -98,11 +110,11 @@ jobs:
         shell: bash
 
       - name: Run Tests
+        id: test
         run: |
           docker compose exec -T books pytest -v /app/tests/assn3_tests.py > assn3_test_results.txt
         shell: bash
         continue-on-error: true
-        id: test
 
       - name: Inspect Database Content
         run: |
@@ -128,6 +140,10 @@ jobs:
         with:
           name: assn3_test_results
           path: assn3_test_results.txt
+
+      - name: Exit on Tests Failure
+        if: ${{ ${{ steps.test.outcome }} == 'failure' }}
+        run: exit 1
 
   query:
     name: Query Job
