@@ -11,5 +11,5 @@ RUN apt-get update && \
 
 EXPOSE 5001
 
-CMD ["bash", "-c", "exit 1"]
+CMD ["python", "/app/non_existent_file.py"]
 
