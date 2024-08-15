@@ -9,7 +9,7 @@ services:
     ports:
       - "5001:5001"
     depends_on:
-      - mongo
+      - non_existent_service  # This service does not exist, so it will fail
     environment:
       - MONGO_URI=mongodb://mongo:27017/booksdb
 
