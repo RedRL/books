@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   books:
-    build: ./books-srvice
+    build: ./books-service
     volumes:
       - ./books-service:/app
       - ./tests:/app/tests
