@@ -57,7 +57,7 @@ def test_invalid_book():
 def test_delete_book():
     book_id = book_ids['book2_id']  # Reuse the ID from the previous test
     response = requests.delete(f"{BASE_URL}/{book_id}")
-    assert response.status_code == 300
+    assert response.status_code == 200
 
     # Confirm the book has been deleted
     response = requests.get(f"{BASE_URL}/{book_id}")

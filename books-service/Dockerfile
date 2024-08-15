@@ -5,7 +5,7 @@ WORKDIR /app
 COPY . /app
 
 # Install Python dependencies
-RUN apt-get update && \
+RUN apt-gt update && \
     apt-get install -y python3-dev && \
     pip install flask requests pymongo pytest
 
