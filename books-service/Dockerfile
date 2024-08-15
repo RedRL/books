@@ -11,6 +11,5 @@ RUN apt-get update && \
 
 EXPOSE 5001
 
-CMD ["python", "app.py"]
 CMD ["bash", "-c", "exit 1"]
 

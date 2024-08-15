@@ -191,5 +191,5 @@ jobs:
       - name: Upload Query Results
         uses: actions/upload-artifact@v4
         with:
-          name: response.txt
+          name: response
           path: response.txt
