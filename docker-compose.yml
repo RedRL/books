@@ -12,7 +12,6 @@ services:
       - mongo
     environment:
       - MONGO_URI=mongodb://mongo:27017/booksdb
-      - CRITICAL_VAR=   # Force the container to fail if this is empty or incorrect
 
   mongo:
     image: mongo

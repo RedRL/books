@@ -86,6 +86,7 @@ jobs:
         run: |
           docker compose up -d
           if [ $? -eq 0 ]; then
+            exit 1
             echo "Container up and running" >> log.txt
           else
             echo "Container failed to run" >> log.txt
