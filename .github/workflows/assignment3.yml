@@ -142,7 +142,7 @@ jobs:
           path: assn3_test_results.txt
 
       - name: Exit on Tests Failure
-        if: ${{ steps.test.outcome }} == 'failure' }}
+        if: ${{ steps.test.outcome == 'failure' }}
         run: exit 1
 
   query:
