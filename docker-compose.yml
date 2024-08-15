@@ -9,9 +9,10 @@ services:
     ports:
       - "5001:5001"
     depends_on:
-      - non_existent_service  # This service does not exist, so it will fail
+      - mongo
     environment:
       - MONGO_URI=mongodb://mongo:27017/booksdb
+      - CRITICAL_VAR=   # Force the container to fail if this is empty or incorrect
 
   mongo:
     image: mongo
