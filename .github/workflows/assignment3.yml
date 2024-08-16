@@ -188,6 +188,11 @@ jobs:
               encoded_query=$(echo "$query" | sed 's/ /%20/g')  # Encode spaces in the query string
               curl_output=$(curl -s -w "\n%{http_code}" -o response_body.txt "http://localhost:5001/books${encoded_query}")
               response_code=$(tail -n1 <<< "$curl_output")
+          
+              cat curl_output
+              cat response_code
+              cat response_body.txt
+          
 
               if [ "$response_code" -eq 200 ]; then
                 # Check if the response is valid JSON
