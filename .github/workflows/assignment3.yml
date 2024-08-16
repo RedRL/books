@@ -89,26 +89,7 @@ jobs:
             echo "Container up and running" >> log.txt
           else
             echo "Container failed to run" >> log.txt
-          fi
-
-      - name: Inspect Database Content via GET Request
-        run: |
-          attempt=0
-          max_attempts=5
-          until [ $attempt -ge $max_attempts ]
-          do
-            curl -s "http://localhost:5001/books" > db_content.txt && break
-            attempt=$((attempt+1))
-            echo "Retry $attempt/$max_attempts: Waiting for books service..."
-            sleep 5
-          done
-          if [ $attempt -eq $max_attempts ]; then
-            echo "Books service did not respond in time"
-            exit 1
-          fi
-          cat db_content.txt
-        shell: bash
-      
+          fi      
 
       - name: Upload Log File on Failure
         if: ${{ steps.start_containers.outcome == 'failure' }}
@@ -158,6 +139,24 @@ jobs:
       - name: Exit on Tests Failure
         if: ${{ steps.test.outcome == 'failure' }}
         run: exit 1
+
+      - name: Inspect Database Content via GET Request
+        run: |
+          attempt=0
+          max_attempts=5
+          until [ $attempt -ge $max_attempts ]
+          do
+            curl -s "http://localhost:5001/books" > db_content.txt && break
+            attempt=$((attempt+1))
+            echo "Retry $attempt/$max_attempts: Waiting for books service..."
+            sleep 5
+          done
+          if [ $attempt -eq $max_attempts ]; then
+            echo "Books service did not respond in time"
+            exit 1
+          fi
+          cat db_content.txt
+        shell: bash
 
   query:
     name: Query Job
