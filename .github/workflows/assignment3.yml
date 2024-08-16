@@ -180,6 +180,21 @@ jobs:
           done
         shell: bash
 
+      - name: Add Books to Database
+        run: |
+          declare -a books=(
+            '{"title": "Adventures of Huckleberry Finn", "authors": "Mark Twain", "publishedDate": "2021-09-21", "ISBN": "9780520343641", "genre": "Fiction", "publisher": "Univ of California Press"}'
+            '{"title": "Fear No Evil", "authors": "Anatoly Shcharansky", "publishedDate": "1988", "ISBN": "9780394558783", "genre": "Biography", "publisher": "Random House (NY)"}'
+            '{"title": "The Adventures of Tom Sawyer", "authors": "Mark Twain", "publishedDate": "1977", "ISBN": "9780195810400", "genre": "Fiction", "publisher": "Oxford University Press, USA"}'
+            '{"title": "I, Robot", "authors": "Isaac Asimov", "publishedDate": "1991-11-01", "ISBN": "9780553294385", "genre": "Science Fiction", "publisher": "National Geographic Books"}'
+            '{"title": "Second Foundation", "authors": "Isaac Asimov", "publishedDate": "1991-10-01", "ISBN": "9780553293364", "genre": "Science Fiction", "publisher": "Spectra"}'
+            '{"title": "The Best of Isaac Asimov", "authors": "Isaac Asimov", "publishedDate": "1973", "ISBN": "9780380006454", "genre": "Science Fiction", "publisher": "Avon Books"}'
+          )
+          for book in "${books[@]}"; do
+            curl -X POST -H "Content-Type: application/json" -d "$book" http://localhost:5001/books
+          done
+        shell: bash
+
       - name: Display All Books in Database
         run: |
           echo "Fetching all books from the database..."
@@ -187,7 +202,7 @@ jobs:
           echo "All Books in the Database:"
           cat all_books.txt
         shell: bash
-        
+
       - name: Execute Queries
         run: |
           touch response.txt  # Ensure the response.txt file exists
@@ -197,11 +212,6 @@ jobs:
               curl_output=$(curl -s -w "\n%{http_code}" -o response_body.txt "http://localhost:5001/books${encoded_query}")
               response_code=$(tail -n1 <<< "$curl_output")
           
-              echo "Curl Output: $curl_output"
-              echo "Response Code: $response_code"
-              cat response_body.txt
-          
-
               if [ "$response_code" -eq 200 ]; then
                 # Check if the response is valid JSON
                 if jq empty response_body.txt > /dev/null 2>&1; then
