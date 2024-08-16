@@ -6,9 +6,4 @@
 ?title=The Adventures of Tom Sawyer
 ?title=I, Robot
 ?title=Second Foundation
-?title=Seco2
 ?publishedDate=2016-06-13
-?publishedDate=2021-09-21
-?publishedDat=2016-06-13
-?title=Adventures of Huckleberry Finn&publishedDate=2021-09-21
-?title=Adventures of Huckleberry Finn&publishedDat=2016-06-13
