@@ -91,11 +91,12 @@ jobs:
             echo "Container failed to run" >> log.txt
           fi
 
-      - name: Inspect Database Content
+      - name: Inspect Database Content via GET Request
         run: |
-          docker exec mongo mongo booksdb --eval 'db.books.find().pretty()'
+          curl -s "http://localhost:5001/books" > db_content.txt
+          cat db_content.txt
         shell: bash
-
+          -
       - name: Upload Log File on Failure
         if: ${{ steps.start_containers.outcome == 'failure' }}
         uses: actions/upload-artifact@v4
@@ -120,11 +121,6 @@ jobs:
           docker compose exec -T books pytest -v /app/tests/assn3_tests.py > assn3_test_results.txt
         shell: bash
         continue-on-error: true
-
-      - name: Inspect Database Content
-        run: |
-          curl -s "http://localhost:5001/books" > db_content.txt
-          cat db_content.txt
 
       - name: Log Test Result
         run: |
