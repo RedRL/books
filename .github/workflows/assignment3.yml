@@ -189,6 +189,7 @@ jobs:
               curl_output=$(curl -s -w "\n%{http_code}" -o response_body.txt "http://localhost:5001/books${encoded_query}")
               response_code=$(tail -n1 <<< "$curl_output")
           
+              cat response_code
               cat response_body.txt
           
 
