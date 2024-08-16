@@ -96,7 +96,7 @@ jobs:
           curl -s "http://localhost:5001/books" > db_content.txt
           cat db_content.txt
         shell: bash
-          -
+      
       - name: Upload Log File on Failure
         if: ${{ steps.start_containers.outcome == 'failure' }}
         uses: actions/upload-artifact@v4
