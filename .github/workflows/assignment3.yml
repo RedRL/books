@@ -180,6 +180,14 @@ jobs:
           done
         shell: bash
 
+      - name: Display All Books in Database
+        run: |
+          echo "Fetching all books from the database..."
+          curl -s "http://localhost:5001/books" > all_books.txt
+          echo "All Books in the Database:"
+          cat all_books.txt
+        shell: bash
+        
       - name: Execute Queries
         run: |
           touch response.txt  # Ensure the response.txt file exists
