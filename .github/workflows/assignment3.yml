@@ -156,6 +156,9 @@ jobs:
             exit 1
           fi
           cat db_content.txt
+          
+          curl -s "http://localhost:5001/books?title=Adventures%20of%20Huckleberry%20Finn" > test.txt
+          cat test.txt
         shell: bash
 
   query:
