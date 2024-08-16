@@ -7,3 +7,6 @@
 ?title=I, Robot
 ?title=Second Foundation
 ?publishedDate=2016-06-13
+?publishedDat=2016-06-13
+?title=Adventures of Huckleberry Finn&publishedDate=2021-09-21
+?title=Adventures of Huckleberry Finn&publishedDat=2021-09-21
