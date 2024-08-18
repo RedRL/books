@@ -1,12 +1,5 @@
-?title=Adventures of Huckleberry Finn
-?title=The Best of Isaac Asimov
-?title=Fear No Evil
-?title=No such book
-?title=The Greatest Joke Book Ever
-?title=The Adventures of Tom Sawyer
-?title=I, Robot
-?title=Second Foundation
-?publishedDate=2016-06-13
-?publishedDat=2016-06-13
-?title=Adventures of Huckleberry Finn&publishedDate=2021-09-21
-?title=Adventures of Huckleberry Finn&publishedDat=2021-09-21
+?authors=Mark Twain
+?ISBN=9780553293364
+?genre=Science Fiction
+?genre=Science Fiction&title=I, Robot
+?publishedDate=1948
