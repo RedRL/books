@@ -15,3 +15,6 @@ The project is configured with GitHub Actions to automate the following tasks:
 - Building the Docker image.
 - Running tests to validate the service.
 - Executing queries and generating reports.
+
+
+Nir - first commit
