@@ -43,7 +43,7 @@ def test_get_book():
 
 def test_get_books():
     response = requests.get(BASE_URL)
-    assert response.status_code == 404
+    assert response.status_code == 200
 
     # Expecting the number of books created so far
     assert len(response.json()) == 3
